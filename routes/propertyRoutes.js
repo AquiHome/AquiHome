@@ -1,19 +1,28 @@
 // routes/propertyRoutes.js
 const express = require('express');
-const router = express.Router();
+const router  = express.Router();
 const {
   createProperty,
   getProperties,
   getPropertyById,
   updateProperty,
-  deleteProperty
+  deleteProperty,
+  getMyProperties
 } = require('../controllers/propertyController');
 const { protect } = require('../middleware/auth');
 
-router.post('/', protect, createProperty);
-router.get('/',        getProperties);
-router.get('/:id',     getPropertyById);
-router.put('/:id',     protect, updateProperty);
-router.delete('/:id',  protect, deleteProperty);
+// 📋 Primero mi listado personal
+router.get('/mine', protect, getMyProperties);
+
+// 🌐 Luego listado público
+router.get('/', getProperties);
+
+// 📇 Después la ruta por ID
+router.get('/:id', getPropertyById);
+
+// ✏️🔨 Mutaciones (protegidas)
+router.post('/',      protect, createProperty);
+router.put('/:id',    protect, updateProperty);
+router.delete('/:id', protect, deleteProperty);
 
 module.exports = router;

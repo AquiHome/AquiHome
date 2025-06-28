@@ -80,6 +80,18 @@ exports.updateProperty = async (req, res) => {
   }
 };
 
+exports.getMyProperties = async (req, res) => {
+  try {
+    // req.user viene de tu middleware protect
+    const myProps = await Property.find({ owner: req.user._id });
+    res.json(myProps);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener tus propiedades', error });
+  }
+};
+
+
 // Eliminar una propiedad (solo su creador)
 exports.deleteProperty = async (req, res) => {
   try {
@@ -103,3 +115,4 @@ exports.deleteProperty = async (req, res) => {
     res.status(500).json({ message: 'Error al eliminar propiedad', error });
   }
 };
+
