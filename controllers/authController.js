@@ -1,59 +1,72 @@
 // controllers/authController.js
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Cliente = require('../models/Cliente');
 const Inmobiliaria = require('../models/Inmobiliaria');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'secret';
-
+// Registro (discriminators)
 exports.register = async (req, res) => {
   const { role, ...userData } = req.body;
-
-  try {
-    const hashedPassword = await bcrypt.hash(userData.password, 10);
-    userData.password = hashedPassword;
-
-    let newUser;
-    if (role === 'Cliente') {
-      newUser = new Cliente(userData);
-    } else if (role === 'Inmobiliaria') {
-      newUser = new Inmobiliaria(userData);
-    } else {
-      return res.status(400).json({ message: 'Rol inválido' });
-    }
-
-    await newUser.save();
-    res.status(201).json({ message: 'Usuario registrado correctamente' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error al registrar usuario', error });
+  let newUser;
+  if (role === 'cliente') {
+    newUser = new Cliente({ ...userData, role });
+  } else if (role === 'inmobiliaria') {
+    newUser = new Inmobiliaria({ ...userData, role });
+  } else {
+    return res.status(400).json({ message: 'Role inválido.' });
   }
+  await newUser.save();
+  res.status(201).json({ message: 'Usuario registrado correctamente.' });
 };
 
+// Login
 exports.login = async (req, res) => {
   const { email, password } = req.body;
+  const user = await User.findOne({ email, active: true });
+  if (!user) return res.status(400).json({ message: 'Usuario no encontrado o inactivo.' });
 
-  try {
-    const user = await User.findOne({ email, isActive: true });
-    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+  const isMatch = await user.matchPassword(password);
+  if (!isMatch) return res.status(400).json({ message: 'Credenciales inválidas.' });
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ message: 'Contraseña incorrecta' });
-
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { id: user._id, name: user.name, role: user.role } });
-  } catch (error) {
-    res.status(500).json({ message: 'Error al iniciar sesión', error });
-  }
+  const token = jwt.sign(
+    { id: user._id, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+  res.json({
+    token,
+    user: { id: user._id, name: user.name, role: user.role }
+  });
 };
 
-exports.deleteAccount = async (req, res) => {
-  const userId = req.user.id;
-
-  try {
-    await User.findByIdAndUpdate(userId, { isActive: false });
-    res.json({ message: 'Cuenta desactivada correctamente' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error al desactivar cuenta', error });
+// Reset Password (sin e-mail externo)
+exports.resetPassword = async (req, res) => {
+  const { email, role, identifier, newPassword } = req.body;
+  if (!email || !role || !identifier || !newPassword) {
+    return res.status(400).json({ message: 'Faltan datos para reset.' });
   }
+
+  let user;
+  if (role === 'cliente') {
+    user = await Cliente.findOne({ email, cedulaIdentidad: identifier, active: true });
+  } else if (role === 'inmobiliaria') {
+    user = await Inmobiliaria.findOne({ email, RUT: identifier, active: true });
+  } else {
+    return res.status(400).json({ message: 'Role inválido.' });
+  }
+
+  if (!user) return res.status(404).json({ message: 'Usuario no encontrado.' });
+
+  user.password = newPassword;
+  await user.save(); // pre-save hook hashea
+  res.json({ message: 'Contraseña restablecida correctamente.' });
+};
+
+// Delete Account (soft-delete)
+exports.deleteAccount = async (req, res) => {
+  const user = req.user; // inyectado por middleware
+  user.active = false;
+  await user.save();
+  res.json({ message: 'Cuenta eliminada correctamente.' });
 };
