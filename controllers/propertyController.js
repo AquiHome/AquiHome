@@ -1,7 +1,5 @@
-// controllers/propertyController.js
 const Property = require('../models/Property');
 
-// Crear una nueva propiedad (solo inmobiliarias)
 exports.createProperty = async (req, res) => {
   try {
     if (req.user.role !== 'inmobiliaria') {
@@ -21,7 +19,6 @@ exports.createProperty = async (req, res) => {
   }
 };
 
-// Listar y filtrar propiedades (público)
 exports.getProperties = async (req, res) => {
   try {
     const { zone, type, minPrice, maxPrice } = req.query;
@@ -42,7 +39,6 @@ exports.getProperties = async (req, res) => {
   }
 };
 
-// Obtener una propiedad por ID (público)
 exports.getPropertyById = async (req, res) => {
   try {
     const prop = await Property.findById(req.params.id);
@@ -55,7 +51,6 @@ exports.getPropertyById = async (req, res) => {
   }
 };
 
-// Actualizar una propiedad (solo su creador)
 exports.updateProperty = async (req, res) => {
   try {
     const prop = await Property.findById(req.params.id);
