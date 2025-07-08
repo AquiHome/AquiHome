@@ -1,0 +1,41 @@
+# Dependencias de Node
+node_modules/
+
+# Variables de entorno
+.env
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Directorios de cobertura de tests
+coverage/
+.nyc_output/
+
+# Salidas de build (si usas transpilers o bundlers)
+/dist/
+/build/
+
+# Archivos de bloqueo de paquetes (opcional, según tu flujo)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Configuración de IDEs/editores
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Cachés y archivos temporales
+*.cache
+*.tmp
