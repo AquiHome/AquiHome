@@ -53,38 +53,64 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
-  if (!user || !(await user.matchPassword(password)))
+
+  if (!user)
     return res.status(401).json({ message: 'Credenciales inválidas' });
 
-  // Actualizar último login
+  if (user.isLockedAccount)
+    return res.status(403).json({ message: 'Cuenta bloqueada por múltiples intentos fallidos. Contacta soporte.' });
+
+  const isMatch = await user.matchPassword(password);
+
+  if (!isMatch) {
+    user.loginAttempts += 1;
+
+    if (user.loginAttempts >= 3) {
+      user.isLockedAccount = true;
+    }
+
+    await user.save();
+
+    return res.status(401).json({
+      message: user.isLockedAccount 
+        ? 'Cuenta bloqueada tras múltiples intentos fallidos.'
+        : 'Contraseña incorrecta'
+    });
+  }
+
+  // ✅ Login exitoso → resetea intentos
+  user.loginAttempts = 0;
   user.lastLogin = Date.now();
   await user.save();
 
   res.json({
     user: {
-      id:         user._id,
-      name:       user.name,
-      email:      user.email,
-      role:       user.role,
-      cedula:     user.cedula,
-      createdAt:  user.createdAt,
-      lastLogin:  user.lastLogin,
+      id:             user._id,
+      nombre:         user.nombre,
+      email:          user.email,
+      tipo_usuario:   user.tipo_usuario,
+      fecha_registro: user.fecha_registro,
+      lastLogin:      user.lastLogin
     },
-    token: generateToken(user._id),
+    token: generateToken(user._id)
   });
 };
+
 
 // ➕ Obtener datos de la cuenta (perfil)
 exports.getMe = async (req, res) => {
   const u = req.user;
   res.json({
-    id:         u._id,
-    name:       u.name,
-    email:      u.email,
-    role:       u.role,
-    cedula:     u.cedula,
-    createdAt:  u.createdAt,
-    lastLogin:  u.lastLogin,
+    id:             u._id,
+    nombre:         u.nombre,
+    email:          u.email,
+    telefono:       u.telefono,
+    direccion:      u.direccion,
+    ciudad:         u.ciudad,
+    departamento:   u.departamento,
+    tipo_usuario:   u.tipo_usuario,
+    fecha_registro: u.fecha_registro,
+    updatedAt:      u.updatedAt
   });
 };
 
@@ -92,4 +118,22 @@ exports.getMe = async (req, res) => {
 exports.deleteMe = async (req, res) => {
   await User.findByIdAndDelete(req.user._id);
   res.json({ message: 'Cuenta eliminada correctamente' });
+};
+
+// 🔓 Desbloquear cuenta manualmente (admin)
+exports.unlockUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId);
+
+    if (!user)
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+
+    user.isLockedAccount = false;
+    user.loginAttempts = 0;
+    await user.save();
+
+    res.json({ message: '✅ Cuenta desbloqueada exitosamente' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };

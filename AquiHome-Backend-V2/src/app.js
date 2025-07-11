@@ -4,8 +4,9 @@ const cors       = require('cors');
 const connectDB  = require('./config/db');
 
 const authRoutes     = require('./routes/auth');
-const houseRoutes    = require('./routes/houses');      // si usas House
-const propertyRoutes = require('./routes/properties');  // o properties
+const propertyRoutes = require('./routes/properties'); 
+const transactionRoutes = require('./routes/transactions');
+
 
 const app = express();
 connectDB();
@@ -15,8 +16,9 @@ app.use(express.json());
 
 // monta las rutas
 app.use('/api/auth',       authRoutes);
-app.use('/api/houses',     houseRoutes);      // opcional
-app.use('/api/properties', propertyRoutes);   // tu endpoint de propiedades
+app.use('/api/properties', propertyRoutes);   
+app.use('/api/transactions', transactionRoutes);
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>

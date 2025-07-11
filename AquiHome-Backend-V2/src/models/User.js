@@ -13,13 +13,24 @@ const userSchema = new mongoose.Schema({
     type: String, 
     enum: ['particular','inmobiliaria','otro'], 
     default: 'particular' 
+  },
+  isLockedAccount: {
+    type: Boolean,
+    default: false
+  },
+  loginAttempts: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: {
-    createdAt: 'fecha_registro',  // Mapea createdAt → fecha_registro
+    createdAt: 'fecha_registro',
     updatedAt: 'updatedAt'
   }
 });
+
+
+
 
 // 🔐 Hashear password antes de guardar
 userSchema.pre('save', async function(next) {

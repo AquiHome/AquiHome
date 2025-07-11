@@ -3,18 +3,23 @@ const {
   register,
   login,
   getMe,
-  deleteMe
+  deleteMe,
+  unlockUser // ✅ agregar esto
 } = require('../controllers/authController');
-const { protect }         = require('../middleware/auth');
+const { protect, restrictTo } = require('../middleware/auth'); // ✅ asegurado
 
 const router = express.Router();
 
-// Registro y login existentes
 router.post('/register', register);
 router.post('/login',    login);
+router.get('/me',        protect, getMe);
+router.delete('/me',     protect, deleteMe);
 
-// ➕ Perfil y eliminación de cuenta
-router.get(   '/me',    protect, getMe);
-router.delete('/me',    protect, deleteMe);
+// ✅ Nuevo endpoint para admins
+router.put(
+  '/unlock/:userId',
+  protect,
+  unlockUser
+);
 
 module.exports = router;

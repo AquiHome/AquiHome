@@ -16,9 +16,9 @@ exports.protect = async (req, res, next) => {
     return res.status(401).json({ message: 'Token inválido' });
   }
 };
-
 exports.restrictTo = (...roles) => (req, res, next) => {
-  if (!roles.includes(req.user.role))
+  if (!roles.includes(req.user.tipo_usuario)) {
     return res.status(403).json({ message: 'No tienes permisos para esto' });
+  }
   next();
 };
