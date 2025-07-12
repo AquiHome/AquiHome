@@ -14,6 +14,10 @@ const userSchema = new mongoose.Schema({
     enum: ['particular','inmobiliaria','otro'], 
     default: 'particular' 
   },
+  puntos: {
+  type: Number,
+  default: 0
+},
   isLockedAccount: {
     type: Boolean,
     default: false
@@ -28,6 +32,7 @@ const userSchema = new mongoose.Schema({
     updatedAt: 'updatedAt'
   }
 });
+
 
 
 

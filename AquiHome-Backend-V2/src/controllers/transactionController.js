@@ -60,9 +60,13 @@ exports.getMyTransactions = async (req, res) => {
   }
 };
 
+
+const User = require('../models/User');
+const Property = require('../models/Property');
+
 exports.confirmTransaction = async (req, res) => {
   try {
-    const transaccion = await Transaction.findById(req.params.id);
+    const transaccion = await Transaction.findById(req.params.id).populate('inmueble_id');
 
     if (!transaccion) {
       return res.status(404).json({ message: 'Transacción no encontrada' });
@@ -72,10 +76,29 @@ exports.confirmTransaction = async (req, res) => {
       return res.status(403).json({ message: 'No puedes confirmar esta transacción' });
     }
 
+    if (transaccion.estado === 'confirmada') {
+      return res.status(400).json({ message: 'La transacción ya está confirmada' });
+    }
+
     transaccion.estado = 'confirmada';
     await transaccion.save();
 
-    res.status(200).json({ message: 'Transacción confirmada', transaccion });
+    // 🧮 Nuevo cálculo de puntos
+    const propiedad = transaccion.inmueble_id;
+    const porcentaje = 0.015;
+    const baseDolares = propiedad.precio * porcentaje;
+    const puntosGanados = Math.floor(baseDolares * 100);
+
+    // ➕ Sumar al usuario
+    const usuario = await User.findById(transaccion.usuario_id);
+    usuario.puntos = (usuario.puntos || 0) + puntosGanados;
+    await usuario.save();
+
+    res.status(200).json({
+      message: `Transacción confirmada. Has ganado ${puntosGanados} puntos.`,
+      puntos_actuales: usuario.puntos,
+      transaccion
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
