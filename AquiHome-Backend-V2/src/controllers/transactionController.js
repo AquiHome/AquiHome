@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const Transaction = require('../models/Transaction');
+const { calcularPuntosPorTransaccion } = require('../services/pointsService');
+
 
 exports.createTransaction = async (req, res) => {
   try {
@@ -85,9 +87,8 @@ exports.confirmTransaction = async (req, res) => {
 
     // 🧮 Nuevo cálculo de puntos
     const propiedad = transaccion.inmueble_id;
-    const porcentaje = 0.015;
-    const baseDolares = propiedad.precio * porcentaje;
-    const puntosGanados = Math.floor(baseDolares * 100);
+    const puntosGanados = calcularPuntosPorTransaccion(propiedad.precio);
+
 
     // ➕ Sumar al usuario
     const usuario = await User.findById(transaccion.usuario_id);

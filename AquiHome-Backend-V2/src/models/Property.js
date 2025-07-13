@@ -38,6 +38,9 @@ const propertySchema = new mongoose.Schema({
     createdAt: 'fecha_publicacion',
     updatedAt: 'updatedAt'
   }
+  
 });
+
+
 
 module.exports = mongoose.model('Property', propertySchema);
