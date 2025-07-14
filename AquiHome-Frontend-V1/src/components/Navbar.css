@@ -1,0 +1,41 @@
+.simple-navbar {
+  width: 100%;
+  background-color: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px 24px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.simple-navbar-left {
+  font-family: 'AquiHome', sans-serif;
+  font-size: 1.3rem;
+  color: #fc5f60;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.simple-navbar-right {
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  color: #374151;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.simple-navbar-right:hover {
+  background-color: #f3f4f6;
+}
