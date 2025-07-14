@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+
 const userSchema = new mongoose.Schema({
   name:      { type: String, required: true },
   email:     { type: String, required: true, unique: true },
@@ -10,7 +11,10 @@ const userSchema = new mongoose.Schema({
   isLocked:  { type: Boolean, default: false },
   isActive:  { type: Boolean, default: true },
   lastLogin: { type: Date, default: null },
-  registrationDate: { type: Date, default: Date.now }
+  registrationDate: { type: Date, default: Date.now },
+  favoriteProviders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Provider', default: [] }],
+  favoriteProperties: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Property', default: [] }]
+
 });
 
 // Hash el password antes de guardar
