@@ -7,7 +7,7 @@ const providerSchema = new mongoose.Schema({
   password:      { type: String, required: true },
   ciOrRut:       { type: String, required: true, unique: true },
   birthDate:     { type: Date },
-  serviceType:   { type: String, required: true },
+  role:          { type: String, enum: ['provider'], default: 'provider', required: true }, // NUEVO
   isLocked:      { type: Boolean, default: false },
   isActive:      { type: Boolean, default: false },
   lastLogin:     { type: Date, default: null },

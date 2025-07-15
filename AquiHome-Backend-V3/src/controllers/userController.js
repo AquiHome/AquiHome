@@ -2,7 +2,8 @@ const User = require('../models/user');
 
 exports.createUser = async (req, res) => {
   try {
-    const user = new User(req.body);
+    const data = { ...req.body, role: 'customer' }; // fuerza rol
+    const user = new User(data);
     await user.save();
     res.status(201).json(user);
   } catch (err) {
@@ -27,7 +28,8 @@ exports.getUserById = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const data = { ...req.body };
+    const user = await User.findByIdAndUpdate(req.params.id, data, { new: true });
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
     res.json(user);
   } catch (err) {

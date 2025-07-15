@@ -2,7 +2,9 @@ const Provider = require('../models/provider');
 
 exports.createProvider = async (req, res) => {
   try {
-    const provider = new Provider(req.body);
+    const data = { ...req.body, role: 'provider' }; // fuerza rol
+    delete data.serviceType; // no guardar serviceType aunque venga
+    const provider = new Provider(data);
     await provider.save();
     res.status(201).json(provider);
   } catch (err) {
@@ -27,7 +29,9 @@ exports.getProviderById = async (req, res) => {
 
 exports.updateProvider = async (req, res) => {
   try {
-    const provider = await Provider.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const data = { ...req.body };
+    if (data.serviceType !== undefined) delete data.serviceType;
+    const provider = await Provider.findByIdAndUpdate(req.params.id, data, { new: true });
     if (!provider) return res.status(404).json({ error: 'Proveedor no encontrado' });
     res.json(provider);
   } catch (err) {
