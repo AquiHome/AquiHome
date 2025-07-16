@@ -58,10 +58,11 @@ exports.create = async (req, res) => {
   res.status(201).json(tx);
 };
 
-// Confirmar (user o provider)
 exports.confirm = async (req, res) => {
   const tx = await Transaction.findById(req.params.id);
   if (!tx) return res.status(404).json({ error: 'Transacción no encontrada' });
+
+  let wasConfirmed = tx.status === 'confirmed';
 
   if (req.user && tx.customer.equals(req.user._id)) {
     tx.customerConfirmed = true;
@@ -72,9 +73,28 @@ exports.confirm = async (req, res) => {
   }
 
   tx.tryConfirm();
+
+  // Solo sumar puntos si acaba de pasar a confirmed
+  if (tx.status === 'confirmed' && !wasConfirmed) {
+    // Buscamos property y user (cliente)
+    const property = await Property.findById(tx.property);
+    const user = await User.findById(tx.customer);
+    if (property && user) {
+      let puntos = 0;
+      if (property.operation === 'venta') {
+        puntos = property.price * 0.015;
+      } else if (property.operation === 'alquiler') {
+        puntos = property.price * 0.40;
+      }
+      user.points = (user.points || 0) + Math.round(puntos);
+      await user.save();
+    }
+  }
+
   await tx.save();
   res.json(tx);
 };
+
 
 // Cancelar transacción (user/provider/admin)
 exports.cancel = async (req, res) => {

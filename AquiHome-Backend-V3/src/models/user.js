@@ -13,7 +13,8 @@ const userSchema = new mongoose.Schema({
   lastLogin: { type: Date, default: null },
   registrationDate: { type: Date, default: Date.now },
   favoriteProviders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Provider', default: [] }],
-  favoriteProperties: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Property', default: [] }]
+  favoriteProperties: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Property', default: [] }],
+  points: { type: Number, default: 0 }
 });
 
 // Hash el password antes de guardar

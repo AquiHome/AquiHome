@@ -131,9 +131,8 @@ exports.getAllActive = async (req, res) => {
     if (req.query.garden) filter.garden = req.query.garden === 'true';
     if (req.query.barbecue) filter.barbecue = req.query.barbecue === 'true';
     if (req.query.furnished) filter.furnished = req.query.furnished === 'true';
-    // Puedes agregar más filtros según tus campos...
 
-    // Paginación opcional
+    // Paginación 
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 20;
     const skip = (page - 1) * limit;
